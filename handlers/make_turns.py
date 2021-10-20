@@ -1,5 +1,5 @@
 from datetime import datetime
-from handlers.exceptions import InvalidTurnStatusException
+from handlers import utils
 from handlers.utils import get_current_player_id
 from models.game import GameModel
 from models.turn import TurnModel
@@ -14,12 +14,9 @@ def complete_previous_turn(game_id, cubes):
         turn_with_cubes.white_cube = cubes["white"]
         turn_with_cubes.event_cube = cubes["event"]
         turn.end_date = datetime.utcnow()
-        turn.status = 'completed'
         turn.save_to_db()
-        # turn_with_cubes.duration = utils.count_turn_duration(turn_with_cubes.id)
+        # turn_with_cubes.duration = utils.count_turn_duration(turn.turn_id)
         turn_with_cubes.save_to_db()
-    else:
-        pass
 
 
 def make_next_turn(game_id,):
@@ -38,8 +35,6 @@ def pause_turn(game_id):
         turn.save_to_db()
         paused_turn = TurnStatusesModel(turn.turn_id, 'is_paused', start_date=datetime.utcnow())
         paused_turn.save_to_db()
-    else:
-        raise InvalidTurnStatusException()
 
 
 def resume_turn(game_id):
@@ -49,5 +44,3 @@ def resume_turn(game_id):
         turn.save_to_db()
         resumed_turn = TurnStatusesModel(turn.turn_id, 'in_progress', start_date=datetime.utcnow())
         resumed_turn.save_to_db()
-    else:
-        raise InvalidTurnStatusException()

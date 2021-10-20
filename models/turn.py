@@ -14,13 +14,16 @@ class TurnModel(db.Model):
     event_cube = db.Column(db.String(10))
     duration = db.Column(db.DateTime)
 
-    # def __init__(self, game_id, player_id, red_cube, white_cube, event_cube):
-    def __init__(self, game_id, player_id):
+    def __init__(self, game_id, player_id, red_cube=None, white_cube=None, event_cube=None):
         self.game_id = game_id
         self.player_id = player_id
-        # self.red_cube = red_cube
-        # self.white_cube = white_cube
-        # self.event_cube = event_cube
+        self.red_cube = red_cube
+        self.white_cube = white_cube
+        self.event_cube = event_cube
+
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
 
     def save_to_db(self):
         db.session.add(self)

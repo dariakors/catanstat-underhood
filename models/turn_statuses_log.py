@@ -1,4 +1,5 @@
 from db import db
+from models.turn import TurnModel
 
 
 class TurnStatusesModel(db.Model):
@@ -18,3 +19,13 @@ class TurnStatusesModel(db.Model):
     def save_to_db(self):
         db.session.add(self)
         db.session.commit()
+
+    @classmethod
+    def find_current_turn(cls, game_id):
+        return cls.query.join(TurnModel, TurnModel.id == cls.turn_id).\
+            filter(TurnModel.game_id == game_id).\
+            filter(cls.end_date == None).first()
+
+    @classmethod
+    def find_all_statuses_by_turn_id(cls, turn_id):
+        return cls.query.filter_by(turn_id=turn_id).all()

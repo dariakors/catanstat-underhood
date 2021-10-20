@@ -1,4 +1,5 @@
 from datetime import datetime
+from handlers.utils import get_current_player_id
 from models.game import GameModel
 from models.player import PlayerModel
 from models.turn import TurnModel
@@ -24,8 +25,3 @@ def create_players(players, game_id):
     for player in players:
         player_db = PlayerModel(**player, game_id=game_id)
         player_db.save_to_db()
-
-
-def get_current_player_id(game_id):
-    order = GameModel.get_current_player_order(game_id)
-    return PlayerModel.find_current_player_id(order, game_id)

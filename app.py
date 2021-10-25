@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from blueprints.game import game_blueprint
 from db import db
 from flasgger import Swagger

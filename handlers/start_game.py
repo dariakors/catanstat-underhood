@@ -35,7 +35,9 @@ def create_first_turn(game_id):
 
 
 def create_players(players, game_id):
+    i = 1
     for player in players:
-        player_db = PlayerModel(**player, game_id=game_id)
+        player_db = PlayerModel(**player, order=i, game_id=game_id)
         player_db.save_to_db()
+        i += 1
     log.info(f'{len(players)} players are successfully created and added to the game')

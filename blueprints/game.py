@@ -8,18 +8,35 @@ game_blueprint = Blueprint('game_blueprint', __name__)
 @game_blueprint.route('/game/start', methods=['POST'])
 def create_game():
     """
-
-    :return:
+    Starting the game with creation of players and first turn
+    ---
+    parameters:
+      - name: body
+        in: body
+        description: list of players with names and colours
+        required: true
+        schema:
+          type: object
+          properties:
+            players:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  colour:
+                    type: string
+    responses:
+      200:
+        description: game was successfully created
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: game id
     """
-    # {"players":
-    #      {
-    #          1: {"name": "Anton", "colour": "brown"},
-    #          2: {"name": "Artem", "colour": "blue"},
-    #          3: {"name": "Daria", "colour": "white"},
-    #          4: {"name": "Julia", "colour": "red"}
-    #      }
-    #
-    # }
     players = request.json.get("players")
     if not players:
         raise BadRequest("Parameter 'players' is not specified")
@@ -32,17 +49,40 @@ def create_game():
 @game_blueprint.route('/game/<game_id>/next', methods=['POST'])
 def make_next_turn(game_id):
     """
-
-    :return:
+    Make next turn for the current game
+    ---
+    parameters:
+      - name: game_id
+        in: path
+        description: id of current game
+        required: true
+        schema:
+          type: integer
+      - name: body
+        in: body
+        description: dictionary of dice with values on red, white and event cubes for previous turn
+        required: true
+        schema:
+          type: object
+          properties:
+            cubes:
+              type: object
+              properties:
+                red:
+                  type: integer
+                white:
+                  type: integer
+                event:
+                  type: string
+                  enum:
+                    - sail
+                    - yellow
+                    - green
+                    - blue
+    responses:
+      200:
+        description: OK
     """
-    # {
-    #     "cubes":
-    #         {
-    #             "red": 3,
-    #             "white": 5,
-    #             "event": "sail"/"yellow"/"green"/"blue"
-    #         }
-    # }
     cubes = request.json.get("cubes")
     if not cubes:
         raise BadRequest("Parameter 'cubes' is not specified")

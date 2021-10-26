@@ -6,7 +6,7 @@ game_blueprint = Blueprint('game_blueprint', __name__)
 
 
 @game_blueprint.route('/game/start', methods=['POST'])
-def start_game():
+def create_game():
     """
 
     :return:

@@ -36,6 +36,10 @@ def create_game():
             id:
               type: integer
               description: game id
+      400:
+        description: parameters are incorrect or not specified
+      500:
+        description: game was not created
     """
     players = request.json.get("players")
     if not players:

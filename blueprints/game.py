@@ -10,6 +10,8 @@ def create_game():
     """
     Starting the game with creation of players and first turn
     ---
+    tags:
+      - game
     parameters:
       - name: body
         in: body
@@ -27,6 +29,13 @@ def create_game():
                     type: string
                   colour:
                     type: string
+                    enum:
+                    - white
+                    - red
+                    - brown
+                    - blue
+                    - green
+                    - yellow
     responses:
       200:
         description: game was successfully created
@@ -55,6 +64,8 @@ def make_next_turn(game_id):
     """
     Make next turn for the current game
     ---
+    tags:
+      - game
     parameters:
       - name: game_id
         in: path
@@ -85,7 +96,15 @@ def make_next_turn(game_id):
                     - blue
     responses:
       200:
-        description: OK
+        description: previous turn was completed and new turn has started
+      400:
+        description: parameters are incorrect or not specified
+      404:
+        description: game was not found or is completed
+      409:
+        description: tha game is paused, making a turn is possible after resuming
+      500:
+        description: turn was not made by some reasons
     """
     cubes = request.json.get("cubes")
     if not cubes:
@@ -98,8 +117,26 @@ def make_next_turn(game_id):
 @game_blueprint.route('/game/<game_id>/pause', methods=['POST'])
 def pause_game(game_id):
     """
-
-    :return:
+    Pause the game
+    ---
+    tags:
+      - game
+    parameters:
+      - name: game_id
+        in: path
+        description: id of current game
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: the game was successfully paused
+      204:
+        description: the game is already paused
+      404:
+        description: game was not found or is completed
+      500:
+        description: the game was not paused by some reasons
     """
     try:
         make_turns.pause_turn(game_id)
@@ -111,8 +148,26 @@ def pause_game(game_id):
 @game_blueprint.route('/game/<game_id>/resume', methods=['POST'])
 def resume_game(game_id):
     """
-
-    :return:
+    Resume the game
+    ---
+    tags:
+      - game
+    parameters:
+      - name: game_id
+        in: path
+        description: id of current game
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: the game was successfully resumed
+      204:
+        description: the game is already resumed
+      404:
+        description: game was not found or is completed
+      500:
+        description: the game was not resumed by some reasons
     """
     try:
         make_turns.resume_turn(game_id)

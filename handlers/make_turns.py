@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from handlers.exceptions import BadRequest
+from handlers.exceptions import BadRequest, CustomApplicationException
 from handlers.utils import get_current_player_id, check_game, determine_current_turn
 from models.game import GameModel
 from models.turn import TurnModel
@@ -27,7 +27,7 @@ def complete_previous_turn(game_id, cubes):
         log.debug(f'Dice {cubes} are saved')
         log.info('Previous turn is completed')
     else:
-        raise BadRequest("The game is paused. Resume it before making a turn")
+        raise CustomApplicationException(409, "The game is paused. Resume it before making a turn")
 
 
 @check_game

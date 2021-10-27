@@ -12,7 +12,15 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = ''
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.register_blueprint(game_blueprint)
-swagger = Swagger(app)
+
+template = dict(info={"description": "Methods that describe digital game process of Catan",
+                      "title": "Swagger Catan Game"},
+                host="catanunderhood.swagger.io",
+                tags=[{"name": "game",
+                       "description": "Game process"},
+                      {"name": "stat",
+                       "description": "Statistics of the game"}])
+swagger = Swagger(app, template=template)
 
 
 @app.before_first_request

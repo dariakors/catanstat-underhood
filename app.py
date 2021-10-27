@@ -1,20 +1,33 @@
 import logging
 import sys
-
 from blueprints.game import game_blueprint
 from db import db
-from flask import Flask
-
+from flasgger import Swagger
+from flask import Flask, jsonify
+from handlers.exceptions import CommonApplicationException
+from werkzeug.exceptions import HTTPException
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = ''
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.register_blueprint(game_blueprint)
+swagger = Swagger(app)
 
 
 @app.before_first_request
 def create_tables():
     db.create_all()
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.error(e, exc_info=True)
+    if isinstance(e, CommonApplicationException):
+        return jsonify(e.to_dict()), e.status_code
+    elif isinstance(e, HTTPException):
+        return jsonify(error=e.description), e.code
+    else:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':

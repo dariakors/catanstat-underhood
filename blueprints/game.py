@@ -1,11 +1,12 @@
-from handlers import start_game, make_turns
 from flask import Blueprint, request, jsonify
+from handlers import start_game, make_turns
+from handlers.exceptions import BadRequest
 
 game_blueprint = Blueprint('game_blueprint', __name__)
 
 
 @game_blueprint.route('/game/start', methods=['POST'])
-def start_game():
+def create_game():
     """
 
     :return:
@@ -20,6 +21,8 @@ def start_game():
     #
     # }
     players = request.json.get("players")
+    if not players:
+        raise BadRequest("Parameter 'players' is not specified")
     game_id = start_game.create_game(len(players))
     start_game.create_players(players, game_id)
     start_game.create_first_turn(game_id)
@@ -41,6 +44,8 @@ def make_next_turn(game_id):
     #         }
     # }
     cubes = request.json.get("cubes")
+    if not cubes:
+        raise BadRequest("Parameter 'cubes' is not specified")
     make_turns.complete_previous_turn(game_id, cubes)
     make_turns.make_next_turn(game_id)
     return jsonify(message="OK"), 200
@@ -52,7 +57,10 @@ def pause_game(game_id):
 
     :return:
     """
-    make_turns.pause_turn(game_id)
+    try:
+        make_turns.pause_turn(game_id)
+    except BadRequest:
+        return '', 204
     return jsonify(message="OK"), 200
 
 
@@ -62,5 +70,8 @@ def resume_game(game_id):
 
     :return:
     """
-    make_turns.resume_turn(game_id)
+    try:
+        make_turns.resume_turn(game_id)
+    except BadRequest:
+        return '', 204
     return jsonify(message="OK"), 200

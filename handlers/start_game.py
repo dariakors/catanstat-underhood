@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+
+from handlers.exceptions import BadRequest
 from handlers.utils import get_current_player_id
 from models.game import GameModel
 from models.player import PlayerModel
@@ -11,10 +13,14 @@ log = logging.getLogger(__name__)
 
 def create_game(players_number):
     log.info('Starting to create the game')
-    game = GameModel(players_number, start_date=datetime.utcnow(), end_date=None)
-    game.save_to_db()
-    log.info('The game with id {game.id} is created')
-    return game.id
+    if 1 < players_number <= 6:
+        game = GameModel(players_number, start_date=datetime.utcnow(), end_date=None)
+        game.save_to_db()
+        log.info('The game with id {game.id} is created')
+        return game.id
+    else:
+        log.debug('The game was not created. Incorrect number of players')
+        raise BadRequest("Amount of players is not correct. Should be between 2 and 6")
 
 
 def create_first_turn(game_id):

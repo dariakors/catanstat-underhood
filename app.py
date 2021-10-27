@@ -21,6 +21,7 @@ def create_tables():
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+    logging.error(e, exc_info=True)
     if isinstance(e, CommonApplicationException):
         return jsonify(e.to_dict()), e.status_code
     elif isinstance(e, HTTPException):

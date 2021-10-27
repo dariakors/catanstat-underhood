@@ -14,3 +14,7 @@ class CommonApplicationException(Exception):
 
 class BadRequest(CommonApplicationException):
     status_code = 400
+
+
+class NotFound(CommonApplicationException):
+    status_code = 404

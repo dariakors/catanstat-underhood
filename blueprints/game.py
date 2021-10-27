@@ -44,6 +44,8 @@ def make_next_turn(game_id):
     #         }
     # }
     cubes = request.json.get("cubes")
+    if not cubes:
+        raise BadRequest("Parameter 'cubes' is not specified")
     make_turns.complete_previous_turn(game_id, cubes)
     make_turns.make_next_turn(game_id)
     return jsonify(message="OK"), 200
@@ -55,7 +57,10 @@ def pause_game(game_id):
 
     :return:
     """
-    make_turns.pause_turn(game_id)
+    try:
+        make_turns.pause_turn(game_id)
+    except BadRequest:
+        return '', 204
     return jsonify(message="OK"), 200
 
 
@@ -65,5 +70,8 @@ def resume_game(game_id):
 
     :return:
     """
-    make_turns.resume_turn(game_id)
+    try:
+        make_turns.resume_turn(game_id)
+    except BadRequest:
+        return '', 204
     return jsonify(message="OK"), 200

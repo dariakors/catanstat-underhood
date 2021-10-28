@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 from functools import wraps
 from handlers.exceptions import NotFound
 from models.game import GameModel
@@ -14,7 +15,31 @@ def get_current_player_id(game_id):
 
 
 def count_turn_duration(turn_id):
-    pass
+    turn_parts = TurnStatusesModel.find_all_statuses_by_turn_id(turn_id)
+    in_progress_parts = list(filter(lambda x: x.status == 'in_progress', turn_parts))
+    is_paused_parts = list(filter(lambda x: x.status == 'is_paused', turn_parts))
+    in_progress_duration = timedelta()
+    is_paused_duration = timedelta()
+    # actual_duration = 0
+    # procrastination_duration = 0
+    for pr_part in in_progress_parts:
+        in_progress_duration += (pr_part.end_date - pr_part.start_date)
+    actual_duration = in_progress_duration.total_seconds() / 60
+    for p_part in is_paused_parts:
+        is_paused_duration += (p_part.end_date - p_part.start_date)
+    procrastination_duration = is_paused_duration.total_seconds() / 60
+    total_duration = actual_duration + procrastination_duration
+    print(total_duration)
+    return {
+        "turn": {
+            "id": turn_id,
+            "duration": {
+                "real_duration": actual_duration,
+                "procrastination_duration": procrastination_duration,
+                "total_duration": total_duration
+            }
+        }
+    }
 
 
 def determine_current_turn(game_id):

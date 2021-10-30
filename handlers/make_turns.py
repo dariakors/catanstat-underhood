@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+
+from handlers import utils
 from handlers.exceptions import BadRequest, CustomApplicationException
 from handlers.utils import get_current_player_id, check_game, determine_current_turn
 from models.game import GameModel
@@ -22,7 +24,7 @@ def complete_previous_turn(game_id, cubes):
             raise BadRequest("Red, white or event cube is missing") from ke
         turn.end_date = datetime.utcnow()
         turn.save_to_db()
-        # turn_with_cubes.duration = utils.count_turn_duration(turn.turn_id)
+        turn_with_cubes.duration = utils.count_turn_duration(turn.turn_id).get("actual_duration")
         turn_with_cubes.save_to_db()
         log.debug(f'Dice {cubes} are saved')
         log.info('Previous turn is completed')

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from handlers import start_game, make_turns
+from handlers import start_game, make_turns, game
 from handlers.exceptions import BadRequest
 
 game_blueprint = Blueprint('game_blueprint', __name__)
@@ -173,4 +173,59 @@ def resume_game(game_id):
         make_turns.resume_turn(game_id)
     except BadRequest:
         return '', 204
+    return jsonify(message="OK"), 200
+
+
+@game_blueprint.route('/game/<game_id>/complete', methods=['POST'])
+def complete_game(game_id):
+    """
+    Complete the game
+    ---
+    tags:
+      - game
+    parameters:
+      - name: game_id
+        in: path
+        description: id of current game
+        required: true
+        schema:
+          type: integer
+      - name: body
+        in: body
+        description: dictionary of dice with values on red, white and event cubes for previous turn
+        required: true
+        schema:
+          type: object
+          properties:
+            cubes:
+              type: object
+              properties:
+                red:
+                  type: integer
+                white:
+                  type: integer
+                event:
+                  type: string
+                  enum:
+                    - sail
+                    - yellow
+                    - green
+                    - blue
+    responses:
+      200:
+        description: game was successfully completed
+      400:
+        description: parameters are incorrect or not specified
+      404:
+        description: game was not found or is already completed
+      409:
+        description: tha game is paused, making a turn is possible after resuming
+      500:
+        description: game was not completed by some reasons
+    """
+    cubes = request.json.get("cubes")
+    if not cubes:
+        raise BadRequest("Parameter 'cubes' is not specified")
+    turn_data = make_turns.complete_previous_turn(game_id, cubes)
+    game.set_winner_and_end_date(game_id, **turn_data)
     return jsonify(message="OK"), 200

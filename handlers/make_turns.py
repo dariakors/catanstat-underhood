@@ -1,9 +1,10 @@
 import logging
 from datetime import datetime
+from typing import Union
 
-from handlers import utils
+from handlers import game
 from handlers.exceptions import BadRequest, CustomApplicationException
-from handlers.utils import get_current_player_id, check_game, determine_current_turn
+from handlers.game import get_current_player_id, check_game, determine_current_turn
 from models.game import GameModel
 from models.turn import TurnModel
 from models.turn_statuses_log import TurnStatusesModel
@@ -12,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 @check_game
-def complete_previous_turn(game_id, cubes):
+def complete_previous_turn(game_id, cubes) -> Union[dict, None]:
     turn = determine_current_turn(game_id)
     if turn.status == 'in_progress':
         turn_with_cubes = TurnModel.find_by_id(turn.turn_id)
@@ -23,13 +24,15 @@ def complete_previous_turn(game_id, cubes):
         except KeyError as ke:
             raise BadRequest("Red, white or event cube is missing") from ke
         turn.end_date = datetime.utcnow()
-        turn.save_to_db()
-        turn_with_cubes.duration = utils.count_turn_duration(turn.turn_id).get("actual_duration")
+        turn_with_cubes.duration = game.count_turn_duration(turn.turn_id).get("actual_duration")
+        turn_data = {"turn_end_date": turn.end_date, "player_id": turn_with_cubes.player_id}
         turn_with_cubes.save_to_db()
+        turn.save_to_db()
         log.debug(f'Dice {cubes} are saved')
         log.info('Previous turn is completed')
+        return turn_data
     else:
-        raise CustomApplicationException(409, "The game is paused. Resume it before making a turn")
+        raise CustomApplicationException(409, "The game is probably paused. Resume it before making a turn")
 
 
 @check_game

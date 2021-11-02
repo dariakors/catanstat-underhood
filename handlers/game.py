@@ -1,12 +1,22 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 from functools import wraps
+
 from handlers.exceptions import NotFound
 from models.game import GameModel
 from models.player import PlayerModel
 from models.turn_statuses_log import TurnStatusesModel
 
 log = logging.getLogger(__name__)
+
+
+def check_game(decorated_func):
+    @wraps(decorated_func)
+    def wrapper(game_id, *args, **kwargs):
+        if not GameModel.find_by_id(game_id):
+            raise NotFound(f"The game with id={game_id} is not found")
+        return decorated_func(game_id, *args, **kwargs)
+    return wrapper
 
 
 def get_current_player_id(game_id):
@@ -22,10 +32,10 @@ def count_turn_duration(turn_id):
     is_paused_duration = timedelta()
     for pr_part in in_progress_parts:
         in_progress_duration += (pr_part.end_date - pr_part.start_date)
-    actual_duration = in_progress_duration.total_seconds() * 1000  # in ms
+    actual_duration = int(in_progress_duration.total_seconds()) * 1000  # in ms
     for p_part in is_paused_parts:
         is_paused_duration += (p_part.end_date - p_part.start_date)
-    procrastination_duration = is_paused_duration.total_seconds() * 1000  # in ms
+    procrastination_duration = int(is_paused_duration.total_seconds()) * 1000  # in ms
     total_duration = actual_duration + procrastination_duration
     return {"actual_duration": actual_duration,
             "procrastination_duration": procrastination_duration,
@@ -42,10 +52,11 @@ def determine_current_turn(game_id):
         raise NotFound(f"The game with id={game_id} was completed. You couldn't make turns anymore")
 
 
-def check_game(decorated_func):
-    @wraps(decorated_func)
-    def wrapper(game_id, *args, **kwargs):
-        if not GameModel.find_by_id(game_id):
-            raise NotFound(f"The game with id={game_id} is not found")
-        decorated_func(game_id, *args, **kwargs)
-    return wrapper
+def set_winner_and_end_date(game_id: int, player_id: int, turn_end_date: datetime) -> None:
+    log.info(f"Completing the game with id={game_id}...")
+    game = GameModel.find_by_id(game_id)
+    log.debug(f"The winner is player with id={player_id}")
+    game.winner = player_id
+    game.end_date = turn_end_date
+    game.save_to_db()
+    log.debug("The game was successfully completed")

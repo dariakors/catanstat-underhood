@@ -8,6 +8,7 @@ flask = "*"
 flask-sqlalchemy = "*"
 psycopg2 = "*"
 flasgger = "*"
+flake8 = "*"
 
 [dev-packages]
 

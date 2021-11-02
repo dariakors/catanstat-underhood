@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 from blueprints.game import game_blueprint
@@ -9,7 +10,7 @@ from handlers.exceptions import CommonApplicationException
 from werkzeug.exceptions import HTTPException
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = ''
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.register_blueprint(game_blueprint)
 

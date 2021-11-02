@@ -12,7 +12,7 @@ class TurnModel(db.Model):
     red_cube = db.Column(db.Integer)
     white_cube = db.Column(db.Integer)
     event_cube = db.Column(db.String(10))
-    duration = db.Column(db.DateTime)
+    duration = db.Column(db.Integer)
 
     def __init__(self, game_id, player_id, red_cube=None, white_cube=None, event_cube=None):
         self.game_id = game_id

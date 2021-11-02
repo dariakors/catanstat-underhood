@@ -8,7 +8,7 @@ class PlayerModel(db.Model):
     colour = db.Column(db.String(20))
     order = db.Column(db.Integer)
     game_id = db.Column(db.Integer, db.ForeignKey('games.id'))
-    game = db.relationship('GameModel')
+    game = db.relationship('GameModel', foreign_keys=[game_id])
 
     def __init__(self, name, colour, order, game_id):
         self.name = name

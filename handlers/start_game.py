@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from handlers.exceptions import BadRequest
-from handlers.utils import get_current_player_id
+from handlers.game import get_current_player_id
 from models.game import GameModel
 from models.player import PlayerModel
 from models.turn import TurnModel

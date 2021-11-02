@@ -8,6 +8,8 @@ class GameModel(db.Model):
     turns_number = db.Column(db.Integer, default=0)
     start_date = db.Column(db.DateTime, default=None)
     end_date = db.Column(db.DateTime, default=None)
+    winner = db.Column(db.Integer, db.ForeignKey('players.id'), default=None)
+    player = db.relationship('PlayerModel', foreign_keys=[winner])
 
     def __init__(self, players_number, start_date, end_date):
         self.players_number = players_number
@@ -40,6 +42,3 @@ class GameModel(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
-
-
-
